@@ -1,0 +1,34 @@
+{
+  "name": "chatgpt-web-workers",
+  "version": "1.0.0",
+  "description": "Astra-led coordination of 1–6 Sol Extra High web workers using built-in conversation tools. No extra MCP server or API key setup.",
+  "author": {
+    "name": "YUTA-fywoo",
+    "url": "https://github.com/YUTA-fywoo"
+  },
+  "homepage": "https://github.com/YUTA-fywoo/chatgpt-web-workers",
+  "repository": "https://github.com/YUTA-fywoo/chatgpt-web-workers",
+  "license": "MIT",
+  "keywords": [
+    "codex",
+    "chatgpt",
+    "astra",
+    "sol",
+    "skills",
+    "multi-agent",
+    "productivity"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "ChatGPT Web Workers",
+    "shortDescription": "Astra leads. Sol workers do substantial work.",
+    "longDescription": "Coordinate 1–6 ordinary ChatGPT Sol Extra High chats from Codex desktop. Use built-in tools for text and the in-app browser for setup and files. Preserve full results, avoid duplicate work, and integrate with focused checks. Requires existing desktop browser and conversation capabilities.",
+    "developerName": "YUTA-fywoo",
+    "category": "Productivity",
+    "capabilities": [],
+    "websiteURL": "https://github.com/YUTA-fywoo/chatgpt-web-workers",
+    "defaultPrompt": [
+      "Use $chatgpt-web-workers to delegate independent work and deliver one integrated result."
+    ]
+  }
+}
