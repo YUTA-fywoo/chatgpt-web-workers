@@ -1,0 +1,73 @@
+name: Publish Skill ZIP
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/publish-skill-zip.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Package the v1.0.0 skill and attach it to its release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          python3 - <<'PY'
+          import hashlib, io, json, os, urllib.request, zipfile
+          repo = os.environ["REPOSITORY"]
+          tag = "v1.0.0"
+          name = f"chatgpt-web-workers-{tag}.zip"
+          api = f"https://api.github.com/repos/{repo}"
+          headers = {"Authorization": "Bearer " + os.environ["GH_TOKEN"], "Accept": "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28"}
+          def request(url, method="GET", data=None, content_type=None):
+              request_headers = dict(headers)
+              if content_type:
+                  request_headers["Content-Type"] = content_type
+              req = urllib.request.Request(url, data=data, headers=request_headers, method=method)
+              with urllib.request.urlopen(req, timeout=60) as response:
+                  return json.load(response)
+          with urllib.request.urlopen(f"https://codeload.github.com/{repo}/zip/refs/tags/{tag}", timeout=60) as response:
+              source_bytes = response.read()
+          with zipfile.ZipFile(io.BytesIO(source_bytes)) as source:
+              assert source.testzip() is None
+              root = next(n.split("/")[0] + "/" for n in source.namelist() if n.endswith("/SKILL.md"))
+              prefix = root + "skills/chatgpt-web-workers/"
+              files = {n[len(prefix):]: source.read(n) for n in source.namelist() if n.startswith(prefix) and not n.endswith("/")}
+              expected = {"SKILL.md", "agents/openai.yaml", "references/files.md", "references/model-guidance.md", "references/transport.md", "references/validation.md"}
+              assert set(files) == expected, sorted(files)
+              files["LICENSE"] = source.read(root + "LICENSE")
+          buffer = io.BytesIO()
+          with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as archive:
+              for path, data in sorted(files.items()):
+                  info = zipfile.ZipInfo("chatgpt-web-workers/" + path, (2026, 9, 12, 0, 0, 0))
+                  info.compress_type = zipfile.ZIP_DEFLATED
+                  info.external_attr = 0o100644 << 16
+                  archive.writestr(info, data)
+          payload = buffer.getvalue()
+          with zipfile.ZipFile(io.BytesIO(payload)) as archive:
+              assert archive.testzip() is None
+              assert all(archive.read("chatgpt-web-workers/" + path) == data for path, data in files.items())
+          digest = "sha256:" + hashlib.sha256(payload).hexdigest()
+          release = request(api + "/releases/tags/" + tag)
+          existing = next((a for a in release["assets"] if a["name"] == name), None)
+          if existing:
+              assert existing.get("digest") == digest, "An existing asset differs; refusing to overwrite it."
+              asset = existing
+          else:
+              upload = release["upload_url"].split("{")[0] + "?name=" + name
+              asset = request(upload, "POST", payload, "application/zip")
+          assert asset["state"] == "uploaded" and asset["size"] == len(payload)
+          assert asset.get("digest") == digest
+          url = asset["browser_download_url"]
+          body = release.get("body") or ""
+          if url not in body:
+              intro = f"**安装包 / Skill ZIP:** [{name}]({url})\n\n解压后直接安装里面的 `chatgpt-web-workers` 文件夹。包含完整技能文件和 MIT 许可证。\n\nExtract and install the included `chatgpt-web-workers` folder. Includes all skill files and the MIT license.\n\n---\n\n"
+              request(api + "/releases/" + str(release["id"]), "PATCH", json.dumps({"body": intro + body}).encode(), "application/json")
+          print(json.dumps({"url": url, "size": len(payload), "digest": digest, "files": sorted(files), "validation": "PASS"}))
+          PY
