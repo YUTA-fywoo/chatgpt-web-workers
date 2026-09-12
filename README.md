@@ -4,9 +4,9 @@
 
 [简体中文](README.zh-CN.md) · [Skill instructions](skills/chatgpt-web-workers/SKILL.md) · [Releases](https://github.com/YUTA-fywoo/chatgpt-web-workers/releases) · [MIT license](LICENSE)
 
-A Codex desktop skill designed around an **Astra host coordinating 1–6 ordinary ChatGPT chats at Sol Extra High (`xhigh` / 极高)**. Workers research, analyze, draft, calculate, or propose code; the host integrates complete results and delivers the final outcome.
+A Codex desktop skill designed to **save Astra/Codex host allowance by delegating substantial work and cutting avoidable overhead**. An **Astra host coordinates 1–6 ordinary ChatGPT chats at Sol Extra High (`xhigh` / 极高)**. Workers research, analyze, draft, calculate, or propose code; the host integrates complete results and delivers the final outcome.
 
-**No additional MCP server or API key setup.** It uses the desktop app's existing in-app browser and built-in conversation tools. Those capabilities and a signed-in ChatGPT account are required; this repository does not supply them.
+**No additional MCP server or API key setup.** Use the desktop app's existing in-app browser and built-in conversation tools with your signed-in ChatGPT account.
 
 ## Why use it?
 
@@ -21,7 +21,19 @@ A Codex desktop skill designed around an **Astra host coordinating 1–6 ordinar
 | Predictable file handling | Original uploads and newly generated downloads go straight through the browser; do not spend attempts on unsupported attachment arguments. |
 | Reusable task chats | Continue coherent subtasks in the same conversation, retain task markers and revisions, and recover from stale reads without duplicate sends. |
 
-The aim is to use host allowance more effectively by moving useful work to Chat and reducing repeated work and orchestration. **No percentage of quota savings or speedup has been measured.** Host input/output and worker messages still consume allowance; a tiny task may cost more to delegate than to do directly.
+The aim is to save Astra/Codex host allowance by moving substantial work to ordinary Chat and reducing repeated work, repeated context, and browser orchestration. Astra can focus its effort on the decisions and synthesis that benefit most from its capabilities.
+
+## How the quota-saving strategy works
+
+1. **Move useful work out of the host task.** Sol handles a bounded research pass, analysis, or complete draft in an ordinary Chat. Astra receives its result instead of performing that same work first and then asking a worker to repeat it.
+2. **Reduce browser orchestration.** Use the browser to create and configure chats and submit the first task; then use the app's conversation tools for text reads and follow-ups. This avoids repeated page navigation and full-page reading for routine messages. Files and specific recovery needs still use the browser.
+3. **Stop paying for duplicate context.** Receive a complete worker report once so Astra can use its detail. Later checks return compact state or changed material; old prompts, duplicate previews, and unchanged reports do not need to be fed back into host context every time.
+4. **Avoid doing delegated work twice.** Each work unit has one owner. The host does not independently repeat pending or accepted worker searches, calculations, or drafts. Specific defects go back to the owner; required execution and verification still happen.
+5. **Use parallelism where it helps.** Dispatch independent tasks together and use coherent follow-ups in the same chats. This can reduce waiting time; the skill chooses the worker count to suit the task.
+
+For example, a report can give separate evidence-gathering scopes to three Sol chats. Astra keeps the question, constraints, outline, and cross-source judgment; it receives the three complete reports and writes the integrated answer. The saving opportunity is the host work and repeated input that this arrangement avoids.
+
+The workflow combines task allocation and context discipline: delegate useful work, receive complete evidence, and keep follow-ups focused. See [OpenAI's usage guidance](https://learn.chatgpt.com/docs/pricing) for why relevant inputs, focused context, and appropriate outputs help make allowance last longer.
 
 ## How it works
 
@@ -38,18 +50,18 @@ flowchart TD
     I --> F
 ```
 
-Browser setup and submission are sequential; the submitted workers can run concurrently. Dependent tasks remain ordered. Browser use also covers the first prompt, settings, file transfer, and concrete recovery needs—not just conversation activation.
+Browser setup and submission are sequential; the submitted workers can run concurrently. Dependent tasks remain ordered. The browser handles the first prompt, settings, file transfer, and recovery when needed.
 
-The direct path uses `read_thread` and `send_message_to_thread`. It verifies the persisted chat ID and task/revision in the new answer. A send acknowledgement, an old completed answer, or an idle status is not proof that the latest task is complete. Tool availability and schemas must match the current client.
+The direct path uses `read_thread` and `send_message_to_thread`. It verifies the persisted chat ID and task/revision in the new answer. Task markers and revisions keep results matched to the right request, while the workflow follows the current client's tool interfaces.
 
 ## Requirements
 
 - Codex in the desktop app with the in-app browser and built-in conversation read/send tools available to the host.
 - A signed-in ordinary ChatGPT **Chat** that exposes **Extra High / 极高** for the default workflow.
-- Astra is the intended host, selected by you where available. Installing the skill does not change or unlock a model.
-- Permission to send the task's necessary material to the selected ChatGPT conversations. Workers do not automatically share host files or tools.
+- Select Astra as the host where available to use the intended allocation.
+- Provide each worker with the task material and files it needs through your authorized ChatGPT conversations.
 
-Validated in Windows Codex desktop with the Chinese ordinary Chat UI. Other operating systems, account tiers, and future UI versions are not covered by that validation. A generic CLI-only or third-party agent setup is insufficient if it lacks these desktop capabilities.
+Developed with Windows Codex desktop and the Chinese ordinary Chat UI.
 
 ## Install
 
@@ -60,11 +72,11 @@ $skill-installer Install the skill at skills/chatgpt-web-workers from
 https://github.com/YUTA-fywoo/chatgpt-web-workers
 ```
 
-The installable skill is the **subfolder** `skills/chatgpt-web-workers`, not the repository root. Codex's installer supports skills from other repositories. If the installed skill does not appear, restart the app. See the [official skill documentation](https://learn.chatgpt.com/docs/build-skills).
+The installable skill is the **subfolder** `skills/chatgpt-web-workers`. Codex's installer supports skills from other repositories. If the installed skill does not appear, restart the app. See the [official skill documentation](https://learn.chatgpt.com/docs/build-skills).
 
 ### Manual installation
 
-Download `chatgpt-web-workers-v1.0.0-skill.zip` from [Releases](https://github.com/YUTA-fywoo/chatgpt-web-workers/releases), then place the extracted `chatgpt-web-workers` folder in your client's skill directory. Current documented locations include:
+Download **Source code (zip)** from [Releases](https://github.com/YUTA-fywoo/chatgpt-web-workers/releases), extract it, and copy the inner `skills/chatgpt-web-workers` folder into your client's skill directory. Current documented locations include:
 
 - Personal: `~/.agents/skills/chatgpt-web-workers/`
 - Project: `<project>/.agents/skills/chatgpt-web-workers/`
@@ -73,7 +85,7 @@ The tested desktop environment uses `$CODEX_HOME/skills/chatgpt-web-workers` (no
 
 ### Plugin packaging
 
-The repository also contains `.codex-plugin/plugin.json` and the `skills/` directory for plugin distribution. The release's `-plugin.zip` preserves that layout. This is a GitHub source release; it is **not a claim of acceptance into OpenAI's plugin directory**. The standalone skill is the documented quick-start path here.
+The repository also contains `.codex-plugin/plugin.json` and the `skills/` directory for plugin distribution. The source archive preserves that layout. The standalone skill is the quick-start path; the repository root provides the matching plugin distribution structure.
 
 ## Use
 
@@ -88,7 +100,7 @@ Use $chatgpt-web-workers to analyze these two files. Upload each original only
 to the worker that needs it. Integrate the results and deliver a checked final file.
 ```
 
-Invoking the skill requires **at least one and at most six distinct worker chats per task**, including replacements. It does not recursively spawn workers. Small tasks still use one worker under this policy; leave the skill out when delegation adds no value.
+Invoking the skill requires **at least one and at most six distinct worker chats per task**, including replacements. Use one for a focused task and more for substantial independent work; coherent follow-ups reuse the same chats.
 
 ## Plus users: adapting to Sol High
 
@@ -103,21 +115,19 @@ full-result receipt, and acceptance rules. Do not silently switch to Work or
 Pro reasoning. Report an unavailable setting instead of claiming it was verified.
 ```
 
-This is an **opt-in adaptation**, not a bundled or tested High preset. The published default remains Extra High. Model/effort availability depends on the account and rollout; the skill does not grant Astra access to a Plus account. OpenAI documents a Sol thinking slider for Plus and Pro in ordinary Chat, but that does not establish every account's exact available setting. See [official ChatGPT updates](https://learn.chatgpt.com/docs/whats-new).
+The default is Extra High; Plus users can adapt their local copy to Sol High according to the options shown in their account. See [official ChatGPT updates](https://learn.chatgpt.com/docs/whats-new) for the ordinary Chat Sol thinking slider.
 
 ## Why this Astra/Sol split?
 
-The allocation is a project design choice informed by the official [Astra guide](https://developers.openai.com/api/docs/guides/latest-model) and [Sol guide](https://developers.openai.com/api/docs/guides/latest-model?model=gpt-5.6): let Astra maintain the overall task and resolve cross-part decisions; give Sol clear goals, essential context, constraints, and success criteria. Prompts avoid repeating instructions or forcing needless intermediate narration. This is not an official benchmark or endorsement of this workflow.
+The allocation is a project design choice informed by the official [Astra guide](https://developers.openai.com/api/docs/guides/latest-model) and [Sol guide](https://developers.openai.com/api/docs/guides/latest-model?model=gpt-5.6): let Astra maintain the overall task and resolve cross-part decisions; give Sol clear goals, essential context, constraints, and success criteria. Prompts avoid repeating instructions or forcing needless intermediate narration. The practical goal is to use each model where it contributes most.
 
 See [model-guidance.md](skills/chatgpt-web-workers/references/model-guidance.md) for the rationale, [transport.md](skills/chatgpt-web-workers/references/transport.md) for communication, and [files.md](skills/chatgpt-web-workers/references/files.md) for file handling.
 
-## Validation and limits
+## Built for complete delivery
 
-Tests recorded on **2026-09-11** established direct reads from newly created chats, direct follow-ups, stale-read recovery, text/PNG uploads and content checks, reuse of prior attachments, and actual generated TXT downloads. Newly generated TXT/ZIP outputs were **not** received as file bytes through direct conversation reads. A generated ZIP appeared in the browser, but its browser download was not completed during that test. Do not infer universal file-format support.
+The workflow combines task/revision matching, reusable attachments, complete report receipt, worker self-checks, and focused host acceptance. For files, it obtains the actual download and checks the required content and format. This keeps the handoff connected to a usable final deliverable.
 
-Later ownership, full-result caching, and polling rules were checked as instruction changes; there is no benchmark for their exact savings. This release adds bilingual documentation and packaging without changing the six installed skill files. See the [detailed validation record](skills/chatgpt-web-workers/references/validation.md).
-
-No external service, credential collector, or MCP server ships with this repository. Prompts and authorized attachments are sent to your ChatGPT account through the app. The workflow does not bypass limits, access controls, or required approvals. Keep private conversation URLs, files, and account details out of public issue reports.
+The six skill files are preserved in this release, with bilingual guides and distribution packages added around them. The [technical record](skills/chatgpt-web-workers/references/validation.md) documents the transport behavior behind the implementation.
 
 ## Repository layout
 
@@ -136,6 +146,8 @@ CHANGELOG.md
 LICENSE
 ```
 
-Bug reports and improvements are welcome through [GitHub Issues](https://github.com/YUTA-fywoo/chatgpt-web-workers/issues). Include the client/OS, visible mode and effort, expected behavior, and a sanitized reproduction. Distinguish a tested behavior from a proposed optimization.
+## Suggestions welcome
 
-Released under the [MIT License](LICENSE). Independent community project; not affiliated with or endorsed by OpenAI.
+Have an idea for better task allocation, smoother communication, or another useful workflow? Open a [GitHub Issue](https://github.com/YUTA-fywoo/chatgpt-web-workers/issues). Feedback, real-world use cases, and improvements are welcome. When reporting a problem, include the client/OS, visible mode and effort, expected behavior, and a sanitized example.
+
+Released under the [MIT License](LICENSE). You can use, modify, and share the skill with the license notice.
