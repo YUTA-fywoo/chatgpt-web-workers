@@ -1,6 +1,6 @@
 interface:
   display_name: "网页 Chat 子智能体"
-  short_description: "通过普通 Chat 的极高模式委派任务，优先直接收发以减少主任务开销"
-  default_prompt: "使用 $chatgpt-web-workers，把这个任务分配给 1—6 个普通 Chat 子智能体；由子智能体自检，你按需验收、整合并交付最终结果。"
+  short_description: "较大任务优先分给四至六个极高 Chat，分担提示词并整合完整结果"
+  default_prompt: "使用 $chatgpt-web-workers，较大且可拆分的任务优先分配给 4—6 个普通 Chat，以精简且完整的任务包分担负载；由 Chat 自检，你验收、整合并交付。"
 policy:
   allow_implicit_invocation: true
