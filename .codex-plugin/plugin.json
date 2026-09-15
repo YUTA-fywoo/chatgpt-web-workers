@@ -1,7 +1,7 @@
 {
   "name": "chatgpt-web-workers",
-  "version": "1.0.0",
-  "description": "Astra-led coordination of 1–6 Sol Extra High web workers using built-in conversation tools. No extra MCP server or API key setup.",
+  "version": "1.1.0",
+  "description": "Astra-led staged coordination of 1–6 ordinary ChatGPT Extra High workers, with internal reads and webpage sends.",
   "author": {
     "name": "YUTA-fywoo",
     "url": "https://github.com/YUTA-fywoo"
@@ -21,8 +21,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "ChatGPT Web Workers",
-    "shortDescription": "Astra leads. Sol workers do substantial work.",
-    "longDescription": "Coordinate 1–6 ordinary ChatGPT Sol Extra High chats from Codex desktop. Use built-in tools for text and the in-app browser for setup and files. Preserve full results, avoid duplicate work, and integrate with focused checks. Requires existing desktop browser and conversation capabilities.",
+    "shortDescription": "Parallel Chats, bounded stages, one final goal.",
+    "longDescription": "Coordinate ordinary ChatGPT Extra High chats from Codex desktop, preferring 4–6 for substantial independent work. Read internally, send through the in-app browser, advance each owner independently, preserve full results, and enforce per-revision deadlines. Requires existing desktop browser and conversation capabilities.",
     "developerName": "YUTA-fywoo",
     "category": "Productivity",
     "capabilities": [],
