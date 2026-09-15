@@ -4,6 +4,8 @@
 
 ### 中文
 
+- 发布说明补充现有能力：安装后无需额外 MCP/API Key 配置；内部读取结合缓存与重复过滤，减少主模型接收界面和重复内容的 token 开销。
+
 - 较大独立任务主动分配给4–6个普通极高 Chat，保留1–6总数及替换计数。
 - 每轮一个主要可验收成果，允许必要关联操作与自查；拆分工序不削减原采集目标，不固定每轮步数。
 - 各负责人独立验收续轮；保存总目标、已接受成果、缺口和下一动作，避免齐步等待与目标漂移。
@@ -16,6 +18,8 @@
 - 同步六个运行文件、中英文指南和插件元数据，提供本版独立安装包。
 
 ### English
+
+- Clarify existing capabilities: no extra MCP/API-key setup after installation, and lower host token overhead through internal reply reads, caching, and duplicate filtering.
 
 - Prefer 4–6 workers for substantial independent scopes, within the existing 1–6 total limit.
 - One primary stage result per prompt; preserve full collection targets and advance owners independently.

@@ -6,7 +6,9 @@
 
 A Codex desktop skill that delegates work to **1–6 ordinary ChatGPT chats at Extra High / 极高**, proactively using **4–6 for substantial independent work**. Astra owns the overall goal, stage acceptance, cross-part decisions, and final delivery. Workers are called **Sol** as a project prompting convention.
 
-Uses the desktop app's existing in-app browser and internal conversation reader. No extra MCP server or API key setup is required by this skill; availability depends on the tools and settings actually exposed in your client and account.
+**No extra MCP server or API key configuration after installation.** Use the Codex desktop app's existing in-app browser and internal conversation reader, with ChatGPT signed in and the required client/account capabilities available.
+
+**Internal reply reads reduce host-model token overhead.** Retrieve conversation content directly instead of repeatedly loading webpage screenshots, UI structure, and duplicate history just to read replies. Compact status probes, cached originals, and duplicate filtering keep context focused on results and evidence. Full first receipt, webpage sends, necessary health checks, and file transfers remain intact. Savings vary by task; no fixed percentage is claimed.
 
 ## What's new in v1.1.0
 
